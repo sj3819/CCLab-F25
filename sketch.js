@@ -1,73 +1,89 @@
 let p;
 let b;
-let s; // offset for background layout noise seed
+let s; 
 
 function setup() {
   let canvas = createCanvas(800, 500);
-  canvas.parent("p5-canvas-container"); 
+  canvas.id("p5-canvas");
+  canvas.parent("p5-canvas-container");
   colorMode(HSL, 360, 100, 100);
   noStroke();
   makeFlower();
-  s = int(noise(10000) * 5000); // base noise offset
+  s = int(noise(1000) * 5000); 
 }
 
 function draw() {
-  //background(255, 0.01);
-
+  background(255, 0.01);
   drawBackgroundFlowers();
   drawCreature(width / 2, height / 2);
 }
 
+//Background flowers
 function drawBackgroundFlowers() {
   let t = frameCount * 0.02;
+  let spacing = 90;
 
-  for (let i = 0; i < 12; i++) {
-    // Use Perlin noise instead of random for placement & variation
-    let nx = i * 0.31 + s;
-    let ny = i * 0.57 + s;
-    let np = i * 0.19 + s;
-
-    let x = noise(nx) * width;
-    let y = noise(ny) * height;
-    let petals = int(map(noise(np), 0, 1, 5, 10));
-    let hue = map(noise(i * 0.12 + s), 0, 1, 0, 360);
-    let size = map(noise(i * 0.45 + s), 0, 1, 0.4, 0.8);
-    let offset = i * 0.5;
-
-    push();
-    translate(x, y);
-    let breath = map(sin(t + offset), -1, 1, 0.7 - 1, 1.0);
-
-    // Petals
-    for (let j = 0; j < petals; j++) {
-      let angle = (TWO_PI / petals) * j;
-      push();
-      rotate(angle);
-      let len = 50 * size * breath;
-      let w = 25 * size * breath;
-      let distance = 40 * size;
-      fill(hue, 60, 65, 0.4);
-      ellipse(0, distance, w, len);
-      pop();
+  for (let i = 60; i < width; i += spacing) {
+    for (let j = 60; j < height; j += spacing) {
+      // Skip the area behind the big flower
+      let d = dist(i, j, width / 2, height / 2);
+      if (d < 160) continue; // keep the circle space clear
+      let n = noise(i * 0.02, j * 0.02, s * 0.001);
+      if (n > 0.3) {
+        let offx = map(noise(i * j + s), 0, 1, -40, 40);
+        let offy = map(noise(i + j + s), 0, 1, -40, 40);
+        drawBackgroundFlower(i + offx, j + offy, t, n);
+      }
     }
-
-    // Center
-    fill((hue + 180) % 360, 80, 50, 0.8);
-    ellipse(0, 0, 10 * size * breath);
-    pop();
   }
 }
 
-// Main flower creature
-function drawCreature(x, y) {
+// Draws one background flower
+function drawBackgroundFlower(x, y, t) {
+  let base = x * y + s;
+  let petals = int(map(noise(base + 100), 0, 1, 5, 10));
+  let hue = map(noise(base + 20), 0, 1, 0, 360);
+  let size = map(noise(base + 30), 0, 1, 0.4, 0.8);
+  let offset = noise(base + 40) * TWO_PI;
+
   push();
   translate(x, y);
+  let breath = map(sin(t + offset), -1, 1, -0.3, 1.0);
+
+  // Petals
+  for (let j = 0; j < petals; j++) {
+    let angle = (TWO_PI / petals) * j;
+    push();
+    rotate(angle);
+    let len = 50 * size * breath;
+    let w = 25 * size * breath;
+    let distance = 40 * size;
+    //noStroke();
+    fill(hue, 60, 65, 0.4);
+    ellipse(0, distance, w, len);
+    pop();
+  }
+
+  // Center
+  fill((hue + 180) % 360, 80, 50, 0.8);
+  ellipse(0, 0, 15 * size * breath);
+  pop();
+}
+
+// Flower Creature
+function drawCreature(x, y) {
+  // swinging effect — map mouse movement to rotation
+  let swing = map(mouseX, 0, width, -PI / 20, PI / 20);
+
+  push();
+  translate(x, y);
+  rotate(swing);
   drawFlower();
   pop();
 }
 
 function drawFlower() {
-  let breath = map(sin(frameCount * 0.02), -1, 1, 0.7 - 1, 1.0);
+  let breath = map(sin(frameCount * 0.02), -1, 1, 0.7, 1.0);
 
   for (let i = 0; i < p; i++) {
     let angle = (TWO_PI / p) * i;
@@ -85,33 +101,67 @@ function drawFlower() {
     pop();
   }
 
-  drawFace(0, 0);
+  // face follows mouse subtly
+  let moveX = map(mouseX, 0, width, -5, 5);
+  let moveY = map(mouseY, 0, height, -3, 3);
+  drawFace(moveX, moveY);
 }
 
+// Face
 function drawFace(x, y) {
   push();
   translate(x, y);
+
   fill(255);
-  circle(0, 0, 30);
+  circle(0, 0, 35);
 
+  let eyeSpacing = 10;
+  let eyeY = -3;
+  let eyeSize = 7;
+  let eyeMoveX = map(mouseX, 0, width, -1.5, 1.5);
+  let eyeMoveY = map(mouseY, 0, height, -1, 1);
+
+  // left eye
+  push();
+  translate(-eyeSpacing + eyeMoveX, eyeY + eyeMoveY);
   fill(0);
-  circle(-9, 0, 5);
-  circle(9, 0, 5);
+  ellipse(0, 0, eyeSize, eyeSize * 1.3);
+  fill(255, 80);
+  ellipse(-1, -2, 2.5, 2.5);
+  pop();
 
+  // right eye
+  push();
+  translate(eyeSpacing + eyeMoveX, eyeY + eyeMoveY);
+  fill(0);
+  ellipse(0, 0, eyeSize, eyeSize * 1.3);
+  fill(255, 80);
+  ellipse(-1, -2, 2.5, 2.5);
+  pop();
+
+  // smile
   noFill();
   stroke(0);
-  strokeWeight(2);
-  arc(0, 5, 10, 10, 0, PI);
+  strokeWeight(1.5);
+  let smileOffset = map(mouseY, 0, height, -1.5, 1.5);
+  arc(0, 5 + smileOffset, 11, 10, 0, PI);
+
+  // cheeks
   noStroke();
+  fill(0, 80, 80, 0.3);
+  ellipse(-eyeSpacing - 4, 6, 7, 4);
+  ellipse(eyeSpacing + 4, 6, 7, 4);
   pop();
 }
 
+// Interactions
 function mousePressed() {
   makeFlower();
-  s += 100; // shifts noise space to generate a new layout
+  s = int(random(10000)); // completely new field
 }
 
+// randomize flower
 function makeFlower() {
-  p = int(map(noise(frameCount * 0.01), 0, 1, 6, 16));
-  b = map(noise(frameCount * 0.02), 0, 1, 0, 360);
+  p = int(random(6, 14));
+  b = random(360);
 }

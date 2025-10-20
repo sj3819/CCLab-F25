@@ -20,28 +20,33 @@ function setup() {
 }
 
 function draw() {
-  //background(255, 0.01);
+  background(255, 0.01);
   drawBackgroundFlowers();
   drawCreature(width / 2, height / 2);
 }
 
-// Background flowers (grid + noise offset)
+//Background flowers
 function drawBackgroundFlowers() {
-  let t = frameCount * 0.02; // time variable
+  let t = frameCount * 0.02;
+  let spacing = 90;
 
-  for (let i = 100; i < width; i += 100) {
-    for (let j = 100; j < height; j += 100) {
-      if (noise(i * j) > 0.2) { // randomly control which grid spots show flowers
-        let offx = map(noise(i * j + s), 0, 1, -100, 100);
-        let offy = map(noise(i + j + s), 0, 1, -150, 150);
-        drawSingleBackgroundFlower(i + offx, j + offy, t);
+  for (let i = 60; i < width; i += spacing) {
+    for (let j = 60; j < height; j += spacing) {
+      // Skip the area behind the big flower
+      let d = dist(i, j, width / 2, height / 2);
+      if (d < 160) continue; // keep the circle space clear
+      let n = noise(i * 0.02, j * 0.02, s * 0.001);
+      if (n > 0.3) {
+        let offx = map(noise(i * j + s), 0, 1, -40, 40);
+        let offy = map(noise(i + j + s), 0, 1, -40, 40);
+        drawBackgroundFlower(i + offx, j + offy, t, n);
       }
     }
   }
 }
 
 // Draws one background flower
-function drawSingleBackgroundFlower(x, y, t) {
+function drawBackgroundFlower(x, y, t) {
   let base = x * y + s;
   let petals = int(map(noise(base + 100), 0, 1, 5, 10));
   let hue = map(noise(base + 20), 0, 1, 0, 360);
@@ -74,14 +79,18 @@ function drawSingleBackgroundFlower(x, y, t) {
 
 // Flower Creature
 function drawCreature(x, y) {
+  // swinging effect — map mouse movement to rotation
+  let swing = map(mouseX, 0, width, -PI / 20, PI / 20);
+
   push();
   translate(x, y);
+  rotate(swing);
   drawFlower();
   pop();
 }
 
 function drawFlower() {
-  let breath = map(sin(frameCount * 0.02), -1, 1, -0.3, 1.0);
+  let breath = map(sin(frameCount * 0.02), -1, 1, 0.7, 1.0);
 
   for (let i = 0; i < p; i++) {
     let angle = (TWO_PI / p) * i;
@@ -99,7 +108,7 @@ function drawFlower() {
     pop();
   }
 
-  // Face movement using mouse
+  // face follows mouse subtly
   let moveX = map(mouseX, 0, width, -5, 5);
   let moveY = map(mouseY, 0, height, -3, 3);
   drawFace(moveX, moveY);
@@ -110,18 +119,16 @@ function drawFace(x, y) {
   push();
   translate(x, y);
 
-  // Face
   fill(255);
   circle(0, 0, 35);
 
-  // Eyes
   let eyeSpacing = 10;
   let eyeY = -3;
   let eyeSize = 7;
   let eyeMoveX = map(mouseX, 0, width, -1.5, 1.5);
   let eyeMoveY = map(mouseY, 0, height, -1, 1);
 
-  // Left eye
+  // left eye
   push();
   translate(-eyeSpacing + eyeMoveX, eyeY + eyeMoveY);
   fill(0);
@@ -130,7 +137,7 @@ function drawFace(x, y) {
   ellipse(-1, -2, 2.5, 2.5);
   pop();
 
-  // Right eye
+  // right eye
   push();
   translate(eyeSpacing + eyeMoveX, eyeY + eyeMoveY);
   fill(0);
@@ -139,14 +146,14 @@ function drawFace(x, y) {
   ellipse(-1, -2, 2.5, 2.5);
   pop();
 
-  // Smile
+  // smile
   noFill();
   stroke(0);
   strokeWeight(1.5);
   let smileOffset = map(mouseY, 0, height, -1.5, 1.5);
   arc(0, 5 + smileOffset, 11, 10, 0, PI);
 
-  // Cheeks
+  // cheeks
   noStroke();
   fill(0, 80, 80, 0.3);
   ellipse(-eyeSpacing - 4, 6, 7, 4);
@@ -157,11 +164,11 @@ function drawFace(x, y) {
 // Interactions
 function mousePressed() {
   makeFlower();
-  s += 10; // shifts background flower layout
+  s = int(random(10000)); // completely new field
 }
 
-// Change flower when mouse clicked
+// randomize flower
 function makeFlower() {
-  p = int(random(6, 14)); // random petal count
-  b = random(360); // random base color
+  p = int(random(6, 14));
+  b = random(360);
 }
