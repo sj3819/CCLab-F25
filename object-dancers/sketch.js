@@ -69,7 +69,7 @@ class BunBun {
     ellipse(-this.s * 0.25, footY, this.s * 0.35, this.s * 0.15);
     ellipse(this.s * 0.25, footY, this.s * 0.35, this.s * 0.15);
 
-    // Arms (soft swing motion)
+    // Arms
     let armOffset = 8 * cos(frameCount * 0.05);
     ellipse(-this.s * 0.45, armOffset + this.s * 0.1, this.s * 0.25, this.s * 0.2);
     ellipse(this.s * 0.45, -armOffset + this.s * 0.1, this.s * 0.25, this.s * 0.2);
@@ -83,7 +83,7 @@ class BunBun {
     ellipse(-this.s * 0.25, -this.s * 1.6, this.s * 0.25, this.s * 0.8);
     ellipse(this.s * 0.25, -this.s * 1.6, this.s * 0.25, this.s * 0.8);
 
-    // Inner ears (soft pink)
+    // Inner ears
     fill(255, 190, 200);
     ellipse(-this.s * 0.25, -this.s * 1.6, this.s * 0.12, this.s * 0.5);
     ellipse(this.s * 0.25, -this.s * 1.6, this.s * 0.12, this.s * 0.5);
@@ -112,7 +112,7 @@ class BunBun {
       -this.s * 0.65, 0,
       -this.s * 0.6);
 
-    // Mouth (gentle smile)
+    // Mouth 
     noFill();
     stroke(120);
     strokeWeight(1.2);
