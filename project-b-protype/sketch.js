@@ -1,6 +1,5 @@
 let particles = [];
 let memories = [];
-let d = 200; // parallax depth
 
 // Camera controls
 let camRotX = 0;
