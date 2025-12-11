@@ -3,13 +3,6 @@ let memories = [];
 let photos = [];
 let sound = [];
 
-// Camera controls
-let camRotX = 0;
-let camRotY = 0;
-let zoom = 600;
-let lastMouseX = 0;
-let lastMouseY = 0;
-
 function preload() {
   photos.push(loadImage("assets/p1.jpg"));
   photos.push(loadImage("assets/p2.jpg"));
@@ -41,67 +34,70 @@ function preload() {
   photos.push(loadImage("assets/p28.jpg"));
   photos.push(loadImage("assets/p29.jpg"));
   photos.push(loadImage("assets/p30.jpg"));
-  // photos.push(loadImage("assets/p31.jpg"));
-  // photos.push(loadImage("assets/p32.jpg"));
-  // photos.push(loadImage("assets/p33.jpg"));
-  // photos.push(loadImage("assets/p34.jpg"));
-  // photos.push(loadImage("assets/p35.jpg"));
-  // photos.push(loadImage("assets/p36.jpg"));
-  // photos.push(loadImage("assets/p37.jpg"));
-  // photos.push(loadImage("assets/p38.jpg"));
-  // photos.push(loadImage("assets/p39.jpg"));
-  // photos.push(loadImage("assets/p40.jpg"));
-  // photos.push(loadImage("assets/p41.jpg"));
-  // photos.push(loadImage("assets/p42.jpg"));
-  // photos.push(loadImage("assets/p43.jpg"));
-  // photos.push(loadImage("assets/p44.jpg"));
-  // photos.push(loadImage("assets/p45.jpg"));
-  // photos.push(loadImage("assets/p46.jpg"));
+  photos.push(loadImage("assets/p31.jpg"));
+  photos.push(loadImage("assets/p32.jpg"));
+  photos.push(loadImage("assets/p33.jpg"));
+  photos.push(loadImage("assets/p34.jpg"));
+  photos.push(loadImage("assets/p35.jpg"));
+  photos.push(loadImage("assets/p36.jpg"));
+  photos.push(loadImage("assets/p37.jpg"));
+  photos.push(loadImage("assets/p38.jpg"));
+  photos.push(loadImage("assets/p39.jpg"));
+  photos.push(loadImage("assets/p40.jpg"));
+  photos.push(loadImage("assets/p41.jpg"));
+  photos.push(loadImage("assets/p42.jpg"));
+  photos.push(loadImage("assets/p43.jpg"));
+  photos.push(loadImage("assets/p44.jpg"));
+  photos.push(loadImage("assets/p45.jpg"));
+  photos.push(loadImage("assets/p46.jpg"));
 
-  sound.push(loadSound("assets/click.mp3"));
-  sound.push(loadSound("assets/Photograph.mp3"));
+  sound.push(loadSound("assets/click.mp3"));        // sound[0]
+  sound.push(loadSound("assets/Photograph.mp3"));   // sound[1]
 }
-// display text
-// fill(255);
-// text("Zoom into each particle to see each unique memory.", 10, 20);
 
 function setup() {
-  createCanvas(windowWidth, windowHeight, WEBGL);
-  noStroke();
+  createCanvas(windowWidth, windowHeight);
 
-  // Play background song
-  if (sound[2].isLoaded()) {
-    sound[2].loop();
-    sound[2].setVolume(0.3);
+  // Play background music once loaded
+  if (sound[1].isLoaded()) {
+    sound[1].loop();
+    sound[1].setVolume(0.3);
   }
 
-  for (let i = 0; i < 31; i++) {
+  // Create particles
+  for (let i = 0; i < 120; i++) {
     let img = random(photos);
 
     particles.push({
-      x: random(-width / 2, width / 2),
-      y: random(-height / 2, height / 2),
-      z: random(-200, 200),
+      x: random(width),
+      y: random(height),
       r: random(3, 6),
       vx: random(-0.6, 0.6),
       vy: random(-0.6, 0.6),
-      vz: random(-0.3, 0.3),
       img: img,
       activeMemory: null
     });
   }
+  textFont("Georgia");
 }
 
 function draw() {
   background(10, 10, 15);
 
-  // Camera rotation
-  translate(0, 0, -zoom);
-  rotateX(camRotX);
-  rotateY(camRotY);
-
   drawConnections();
   drawParticles();
+
+  // CENTER TITLE 
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(48);
+  textStyle(BOLD);
+  text("My Memories", width / 2, height / 2 - 40);
+
+  // INSTRUCTIONS BELOW TITLE
+  textSize(15);
+  textStyle(NORMAL);
+  text("Click each particle to reveal a unique memory.", width / 2, height / 2 + 20);
 
   // Update & display memories
   for (let i = memories.length - 1; i >= 0; i--) {
@@ -116,16 +112,10 @@ function draw() {
   }
 }
 
-// CLICK TO REVEAL — One memory per particle
+// CLICK — one memory per particle
 function mousePressed() {
-  lastMouseX = mouseX;
-  lastMouseY = mouseY;
-
   for (let p of particles) {
-    let screenPos = createVector();
-    screenPos = screenPosition(p.x, p.y, p.z);
-
-    let d = dist(mouseX - width / 2, mouseY - height / 2, screenPos.x, screenPos.y);
+    let d = dist(mouseX, mouseY, p.x, p.y);
 
     if (d < p.r + 8 && p.activeMemory == null) {
       let mem = new PixelMemory(p, p.img);
@@ -133,8 +123,6 @@ function mousePressed() {
       memories.push(mem);
 
       if (sound[0].isLoaded()) sound[0].play();
-      if (sound[1].isLoaded()) setTimeout(() => sound[1].play(), 200);
-
       break;
     }
   }
@@ -142,21 +130,23 @@ function mousePressed() {
 
 function drawParticles() {
   noStroke();
-  fill(180, 200, 255, 150);
 
   for (let p of particles) {
     p.x += p.vx;
     p.y += p.vy;
-    p.z += p.vz;
 
-    if (p.x < -width / 2 || p.x > width / 2) p.vx *= -1;
-    if (p.y < -height / 2 || p.y > height / 2) p.vy *= -1;
-    if (p.z < -200 || p.z > 200) p.vz *= -1;
+    if (p.x < 0 || p.x > width) p.vx *= -1;
+    if (p.y < 0 || p.y > height) p.vy *= -1;
 
-    push();
-    translate(p.x, p.y, p.z);
-    sphere(p.r);
-    pop();
+    // Glow effect when memory is active
+    if (p.activeMemory) {
+      let glowAlpha = map(p.activeMemory.lifespan, 0, 600, 40, 180);
+      fill(180, 200, 255, glowAlpha);
+      ellipse(p.x, p.y, p.r * 10);  // big glow
+    }
+
+    fill(180, 200, 255, 150);
+    ellipse(p.x, p.y, p.r * 2);
   }
 }
 
@@ -168,22 +158,24 @@ function drawConnections() {
     for (let j = i + 1; j < particles.length; j++) {
       let a = particles[i];
       let b = particles[j];
-      let d = dist(a.x, a.y, a.z, b.x, b.y, b.z);
+      let d = dist(a.x, a.y, b.x, b.y);
 
-      if (d < 120) line(a.x, a.y, a.z, b.x, b.y, b.z);
+      if (d < 120) line(a.x, a.y, b.x, b.y);
     }
   }
 }
 
-// MEMORY CLASS
 class PixelMemory {
   constructor(particle, img) {
     this.particle = particle;
     this.img = img;
+
     this.lifespan = 600;
     this.fadeStart = 200;
-    this.pixelSize = 4;
+
+    this.pixelSize = 3;
     this.pixelsPerFrame = 230;
+
     this.revealSize = random(280, 420);
 
     let maxW = this.revealSize;
@@ -195,6 +187,7 @@ class PixelMemory {
 
     img.loadPixels();
     this.pixels = [];
+
     for (let yy = 0; yy < this.displayH; yy += this.pixelSize) {
       for (let xx = 0; xx < this.displayW; xx += this.pixelSize) {
         let ix = floor(xx / this.scaleFactor);
@@ -206,10 +199,11 @@ class PixelMemory {
           y: yy,
           r: img.pixels[idx],
           g: img.pixels[idx + 1],
-          b: img.pixels[idx + 2]
+          b: img.pixels[idx + 2],
         });
       }
     }
+
     this.pixels = shuffle(this.pixels);
     this.currentIndex = 0;
   }
@@ -219,6 +213,15 @@ class PixelMemory {
   }
 
   display() {
+    let x = this.particle.x;
+    let y = this.particle.y;
+
+    let halfW = this.displayW / 2;
+    let halfH = this.displayH / 2;
+
+    x = constrain(x, halfW, width - halfW);
+    y = constrain(y, halfH, height - halfH);
+
     push();
 
     let alpha = 255;
@@ -229,7 +232,7 @@ class PixelMemory {
     if (this.lifespan < this.fadeStart)
       shrink = map(this.lifespan, 0, this.fadeStart, 0, 1);
 
-    translate(this.particle.x, this.particle.y, this.particle.z);
+    translate(x, y);
     scale(shrink);
     translate(-this.displayW / 2, -this.displayH / 2);
 
@@ -246,22 +249,4 @@ class PixelMemory {
 
     pop();
   }
-}
-
-// Camera drag to rotate
-function mouseDragged() {
-  let sensitivity = 0.005;
-  camRotY += (mouseX - lastMouseX) * sensitivity;
-  camRotX += (mouseY - lastMouseY) * sensitivity;
-  lastMouseX = mouseX;
-  lastMouseY = mouseY;
-}
-
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight, WEBGL);
-}
-
-function keyPressed() {
-  if (key === '+' || key === '=') zoom -= 100;
-  if (key === '-' || key === '_') zoom += 100;
 }
