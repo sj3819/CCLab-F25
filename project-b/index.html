@@ -9,31 +9,23 @@
 
   <link rel="stylesheet" type="text/css" href="style.css">
 
+  <!-- p5 libraries -->
   <script src="lib/p5.js"></script>
   <script src="lib/p5.sound.js"></script>
   <script src="https://unpkg.com/ml5@1/dist/ml5.js"></script>
-  <script src="sketch.js"></script>
-
-
-  <!-- Alternatively, you can import the library via CDN (Content Delivery Network). -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.js"></script> -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/addons/p5.sound.js"></script> -->
 
 </head>
 
 <body>
 
-  <div class="main-wrapper">
-    <h1>Pixel Diary</h1>
-
-    <!-- the following div will contain the p5 canvas. -->
-    <div id="p5-canvas-container">
-      <!-- p5 canvas will be appended here. -->
-    </div>
+  <!-- the following div will contain the p5 canvas. -->
+  <div id="p5-canvas-container">
+    <!-- p5 canvas will be appended here -->
   </div>
 
-  <!-- the script tag below should always be at the bottom, right before the closing body tag -->
+  <!-- load sketch LAST so p5 can attach canvas to the div -->
   <script src="sketch.js"></script>
+
 </body>
 
 </html>
